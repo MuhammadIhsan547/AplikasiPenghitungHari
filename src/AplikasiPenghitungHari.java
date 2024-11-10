@@ -27,7 +27,7 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
         initComponents();
     }
     
-    private String terjemahHari(java.time.DayOfWeek hari) {
+    private String HariBahasaIndo(java.time.DayOfWeek hari) {
         // Menggunakan switch case standar untuk kompatibilitas dengan NetBeans 8.2
         switch (hari) {
             case MONDAY:
@@ -49,6 +49,7 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
         }
     }
     
+  
      // Metode untuk memperbarui JComboBox dan JSpinner sesuai dengan tanggal yang dipilih pada JCalendar
     private void sinkronkanComboBoxDanSpinner() {
         java.util.Calendar cal = KalenderPenghitungHari.getCalendar();
@@ -286,14 +287,17 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
         java.time.LocalDate hariTerakhir = ym.atEndOfMonth();
         boolean kabisat = java.time.Year.isLeap(tahun);
         String pesanKabisat = kabisat ? " (Tahun Kabisat)" : "";
-        String hariAwal = terjemahHari(hariPertama.getDayOfWeek());
-        String hariAkhir = terjemahHari(hariTerakhir.getDayOfWeek());
+        String hariAwal = HariBahasaIndo(hariPertama.getDayOfWeek());
+        String hariAkhir = HariBahasaIndo(hariTerakhir.getDayOfWeek());
         String hasil = String.format(
                 "Jumlah Hari: %d%s\nHari Pertama: %s\nHari Terakhir: %s",
                 hariDalamBulan, pesanKabisat, hariAwal, hariAkhir
         );
         JOptionPane.showMessageDialog(this, hasil);
-        LabelHasilHitungHari.setText("Hari Pertama: " + hariAwal + " dan " +  " Hari Terakhir: " + hariAkhir);
+        LabelHasilHitungHari.setText("<html>Jumlah Hari: " + hariDalamBulan 
+                             + "<br>Hari Pertama: " + hariAwal 
+                             + "<br>Hari Terakhir: " + hariAkhir + "</html>");
+
     }//GEN-LAST:event_TombolHitungActionPerformed
 
     private void TombolHitungSelisihHariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolHitungSelisihHariActionPerformed
