@@ -2,11 +2,10 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
+import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 
 /*
@@ -26,6 +25,39 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
      */
     public AplikasiPenghitungHari() {
         initComponents();
+    }
+    
+    private String terjemahHari(java.time.DayOfWeek hari) {
+        // Menggunakan switch case standar untuk kompatibilitas dengan NetBeans 8.2
+        switch (hari) {
+            case MONDAY:
+                return "Senin";
+            case TUESDAY:
+                return "Selasa";
+            case WEDNESDAY:
+                return "Rabu";
+            case THURSDAY:
+                return "Kamis";
+            case FRIDAY:
+                return "Jumat";
+            case SATURDAY:
+                return "Sabtu";
+            case SUNDAY:
+                return "Minggu";
+            default:
+                return "";
+        }
+    }
+    
+     // Metode untuk memperbarui JComboBox dan JSpinner sesuai dengan tanggal yang dipilih pada JCalendar
+    private void sinkronkanComboBoxDanSpinner() {
+        java.util.Calendar cal = KalenderPenghitungHari.getCalendar();
+        if (cal != null) {
+            int bulan = cal.get(java.util.Calendar.MONTH);
+            int tahun = cal.get(java.util.Calendar.YEAR);
+            ComboBox1.setSelectedIndex(bulan);
+            SpinnerTahun.setValue(tahun);
+        }
     }
     
    
@@ -85,6 +117,12 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
 
         LabelMasukkanTahun.setText("Masukkan Tahun");
 
+        KalenderPenghitungHari.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                KalenderPenghitungHariPropertyChange(evt);
+            }
+        });
+
         TombolHitung.setText("Hitung");
         TombolHitung.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -94,7 +132,7 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
 
         LabelHasilHitungHari.setText("Hasil : ");
 
-        jLabel2.setFont(new java.awt.Font("Verdana", 1, 14)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Perhitungan Selisih Hari");
 
@@ -148,7 +186,7 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
                         .addGap(188, 188, 188)
                         .addComponent(TombolHitungSelisihHari, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(LabelHasilSelisihHari))
-                .addContainerGap(109, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(52, 52, 52)
                 .addComponent(TombolHapus)
@@ -172,9 +210,9 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(LabelHasilHitungHari)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
                 .addComponent(KalenderPenghitungHari, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(19, 19, 19))
+                .addGap(153, 153, 153))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -240,9 +278,22 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
 
     private void TombolHitungActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolHitungActionPerformed
         // TODO add your handling code here:
-        TombolHitung.addActionListener((ActionEvent e) -> {
-        kalkulatorhari();
-        });
+        int tahun = (int) SpinnerTahun.getValue();
+        int indexBulan = ComboBox1.getSelectedIndex() + 1;
+        java.time.YearMonth ym = java.time.YearMonth.of(tahun, indexBulan);
+        int hariDalamBulan = ym.lengthOfMonth();
+        java.time.LocalDate hariPertama = ym.atDay(1);
+        java.time.LocalDate hariTerakhir = ym.atEndOfMonth();
+        boolean kabisat = java.time.Year.isLeap(tahun);
+        String pesanKabisat = kabisat ? " (Tahun Kabisat)" : "";
+        String hariAwal = terjemahHari(hariPertama.getDayOfWeek());
+        String hariAkhir = terjemahHari(hariTerakhir.getDayOfWeek());
+        String hasil = String.format(
+                "Jumlah Hari: %d%s\nHari Pertama: %s\nHari Terakhir: %s",
+                hariDalamBulan, pesanKabisat, hariAwal, hariAkhir
+        );
+        JOptionPane.showMessageDialog(this, hasil);
+        LabelHasilHitungHari.setText("Hari Pertama: " + hariAwal + " dan " +  " Hari Terakhir: " + hariAkhir);
     }//GEN-LAST:event_TombolHitungActionPerformed
 
     private void TombolHitungSelisihHariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TombolHitungSelisihHariActionPerformed
@@ -277,6 +328,11 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
             HapusInputan();
         });
     }//GEN-LAST:event_TombolHapusActionPerformed
+
+    private void KalenderPenghitungHariPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_KalenderPenghitungHariPropertyChange
+        // TODO add your handling code here:
+         sinkronkanComboBoxDanSpinner();
+    }//GEN-LAST:event_KalenderPenghitungHariPropertyChange
      
     
     // Metode untuk menghitung selisih hari antara dua tanggal
@@ -291,9 +347,10 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
 
         // Menghitung selisih hari menggunakan ChronoUnit.DAYS
         long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        
 
         // Menampilkan hasil selisih hari pada JLabel
-        LabelHasilSelisihHari.setText("Selisih hari antara dua tanggal: " + daysBetween + " hari");
+        LabelHasilSelisihHari.setText(" Hasil Selisih hari antara dua tanggal: " + daysBetween + " hari");
     }
     
      private void PerbaruiKalender() {
@@ -307,39 +364,8 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
         selectedDate.set(Calendar.DAY_OF_MONTH, 1);
         KalenderPenghitungHari.setCalendar(selectedDate); // Memperbarui tampilan JCalendar
     }
-    
-    
-    private void kalkulatorhari() {
-        //Mengambil nilai bulan dari JComboBox
-        int month = ComboBox1.getSelectedIndex() + 1; // ComboBox menggunakan indeks dari 0, jadi ditambah 1
-        // Mengambil nilai tahun dari JSpinner
-        int year = (int) SpinnerTahun.getValue();
 
-        // Juga mengatur tanggal KalenderPenghitungHari sesuai dengan bulan dan tahun yang dipilih
-        Calendar selectedDate = KalenderPenghitungHari.getCalendar();
-        selectedDate.set(Calendar.MONTH, month - 1); // Calendar.MONTH menggunakan indeks dari 0
-        selectedDate.set(Calendar.YEAR, year);
-        KalenderPenghitungHari.setCalendar(selectedDate); // Menampilkan bulan dan tahun yang dipilih di KalenderPenghitungHari
-
-        // Membuat objek YearMonth berdasarkan bulan dan tahun yang dipilih
-        YearMonth yearMonth = YearMonth.of(year, month);
-
-        // Menghitung jumlah hari dalam bulan tersebut
-        int daysInMonth = yearMonth.lengthOfMonth();
-
-        // Mendapatkan hari pertama dan hari terakhir dalam bulan tersebut
-        LocalDate firstDay = yearMonth.atDay(1);
-        LocalDate lastDay = yearMonth.atEndOfMonth();
-
-        // Menampilkan hasil jumlah hari, hari pertama, dan hari terakhir pada LabelHasilHitungHari
-        LabelHasilHitungHari.setText(String.format(
-            "Jumlah hari: %d, Hari pertama: %s, Hari terakhir: %s", 
-            daysInMonth, firstDay.getDayOfWeek(), lastDay.getDayOfWeek()
-        ));
-     
-    }
-
-// Metode untuk menghapus atau mereset pilihan
+    // Metode untuk menghapus atau mereset pilihan
     private void HapusInputan() {
         // Reset bulan ke Januari
         ComboBox1.setSelectedIndex(0);
